@@ -14,7 +14,6 @@ class MainMenuScreen extends StatefulWidget {
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
   final ApiService _apiService = ApiService();
-  // Загружаем оценки один раз
   late Future<List<Mark>> _marksFuture; 
 
   @override
@@ -23,7 +22,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _marksFuture = _apiService.getMarks(widget.token);
   }
 
-  // === 1. ЛОГИКА ВЫЧИСЛЕНИЯ СРЕДНИХ ОЦЕНОК ===
   Map<String, double> _calculateAverages(List<Mark> marks) {
     double totalHomeWorkMarks = 0;
     int homeWorkCount = 0;
@@ -67,16 +65,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     };
   }
   
-  // === 2. ЛОГИКА ВЫЧИСЛЕНИЯ СТАТИСТИКИ ПОСЕЩАЕМОСТИ ===
   Map<String, double> _calculateAttendance(List<Mark> marks) {
     if (marks.isEmpty) {
       return {'total': 0, 'attended': 0, 'late': 0, 'missed': 0, 'attended_percent': 0.0, 'late_percent': 0.0, 'missed_percent': 0.0};
     }
 
     final int totalLessons = marks.length;
-    int attendedCount = 0;  // statusWas 1 (был) или 2 (опоздал)
-    int lateCount = 0;      // statusWas 2 (опоздал)
-    int missedCount = 0;    // statusWas 0 (не был)
+    int attendedCount = 0;  
+    int lateCount = 0;      
+    int missedCount = 0;    
 
     for (var mark in marks) {
       if (mark.statusWas == 1) {
@@ -99,10 +96,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       'missed_percent': (missedCount / totalLessons) * 100,
     };
   }
-
-  // === 3. ВИДЖЕТЫ КАРТОЧЕК ===
   
-  // Вспомогательный виджет для отображения карточки СРЕДНЕЙ оценки
   Widget _buildMarkAverageCard(String title, double average, Color color) {
     final averageString = average == 0.0 ? 'Н/Д' : average.toStringAsFixed(2);
     
@@ -139,7 +133,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  // Новый вспомогательный виджет для отображения статистики ПОСЕЩАЕМОСТИ
   Widget _buildAttendanceStatCard(String title, double count, double percentage, Color color) {
     final countString = count.toInt().toString();
     final percentString = percentage.toStringAsFixed(2);
@@ -149,7 +142,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     if (title == 'Всего пар') {
       mainText = countString;
     } else {
-      // Формат: "741 (97.12%)"
       mainText = '$countString (${percentString}%)';
     }
 
@@ -167,7 +159,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 mainText,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 16, // Немного меньше, чтобы вместился процент
+                  fontSize: 16,
                   fontWeight: FontWeight.bold, 
                   color: Colors.white
                 ),
@@ -177,7 +169,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 10, // Меньше шрифт для заголовка
+                  fontSize: 10,
                   color: Colors.white70
                 ),
               ),
@@ -214,7 +206,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ЗАГОЛОВОК ДЛЯ ОЦЕНОК
                  const Padding(
                   padding: EdgeInsets.only(top: 10.0, bottom: 4.0, left: 12.0, right: 12.0),
                   child: Text(
@@ -223,7 +214,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                 ),
                 
-                // 1. Карточки средних оценок
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
@@ -236,7 +226,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                 ),
                 
-                // ЗАГОЛОВОК ДЛЯ ПОСЕЩАЕМОСТИ
                 const Padding(
                   padding: EdgeInsets.only(top: 10.0, bottom: 4.0, left: 12.0, right: 12.0),
                   child: Text(
@@ -245,18 +234,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   ),
                 ),
                 
-                // 2. Карточки посещаемости
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     children: [
-                      // Всего пар (без процента)
                       _buildAttendanceStatCard('Всего пар', attendance['total'] ?? 0.0, 0.0, Colors.grey.shade700),
-                      // Посещено
                       _buildAttendanceStatCard('Посещено Пар', attendance['attended'] ?? 0.0, attendance['attended_percent'] ?? 0.0, Colors.green.shade700),
-                      // Опозданий
                       _buildAttendanceStatCard('Опозданий', attendance['late'] ?? 0.0, attendance['late_percent'] ?? 0.0, Colors.orange.shade700),
-                      // Пропусков
                       _buildAttendanceStatCard('Пропусков', attendance['missed'] ?? 0.0, attendance['missed_percent'] ?? 0.0, Colors.red.shade700),
                     ],
                   ),
