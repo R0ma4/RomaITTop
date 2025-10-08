@@ -11,6 +11,43 @@ class MarksAndProfileScreen extends StatefulWidget {
   State<MarksAndProfileScreen> createState() => _HomeScreenState();
 }
 
+Widget _buildStatusIcon(int? statusWas) {
+    if (statusWas == null) return const SizedBox.shrink();
+
+    IconData icon;
+    Color color;
+    String tooltipText;
+
+    switch (statusWas) {
+      case 0:
+        icon = Icons.cancel;
+        color = Colors.red.shade700;
+        tooltipText = 'Не был';
+        break;
+      case 1:
+        icon = Icons.check_circle;
+        color = Colors.green.shade700;
+        tooltipText = 'Был';
+        break;
+      case 2:
+        icon = Icons.watch_later;
+        color = Colors.orange.shade700;
+        tooltipText = 'Опоздал';
+        break;
+      default:
+        return const SizedBox.shrink();
+    }
+
+    return Tooltip(
+      message: tooltipText,
+      child: Icon(
+        icon,
+        color: color,
+        size: 28,
+      ),
+    );
+  }
+
 class _HomeScreenState extends State<MarksAndProfileScreen> {
   final _apiService = ApiService();
   late Future<List<Mark>> _marksFuture;
@@ -43,6 +80,8 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
     default:
       color = Colors.black;
   }
+
+  
 
   return Container(
     margin: const EdgeInsets.only(right: 6),
@@ -102,6 +141,10 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: _buildStatusIcon(mark.statusWas),
+                      ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
