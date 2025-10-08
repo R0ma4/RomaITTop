@@ -23,6 +23,45 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
     _userFuture = _apiService.getUser(widget.token);
   }
 
+  Widget _buildMarkChip(int? mark, String type) {
+  if (mark == null) return const SizedBox.shrink();
+
+  Color color;
+  switch (type) {
+    case 'home':
+      color = Colors.red.shade700; // Домашняя работа
+      break;
+    case 'control':
+      color = Colors.green.shade700; // Контрольная
+      break;
+    case 'lab':
+      color = Colors.purple.shade700; // Лабораторная
+      break;
+    case 'class':
+      color = Colors.blue.shade700; // В классе
+      break;
+    default:
+      color = Colors.black;
+  }
+
+  return Container(
+    margin: const EdgeInsets.only(right: 6),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      mark.toString(),
+      style: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+      ),
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,7 +93,6 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
             itemCount: marks.length,
             itemBuilder: (context, index) {
               final mark = marks[index];
-              final markValue = mark.homeWorkMark?.toString() ?? 'Б/О';
               
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
@@ -64,21 +102,6 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 40,
-                        alignment: Alignment.center,
-                        child: Text(
-                          markValue,
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: markValue == 'Б/О' ? Colors.grey : Colors.blue,
-                          ),
-                        ),
-                      ),
-                      
-                      const SizedBox(width: 12),
-                      
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,12 +119,29 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
+                            const SizedBox(height: 8),
+
+                            Wrap( 
+                              spacing: 6.0,
+                              runSpacing: 4.0,
+                              children: [
+                                _buildMarkChip(mark.homeWorkMark, 'home'),
+                                _buildMarkChip(mark.controlWorkMark, 'control'),
+                                _buildMarkChip(mark.labWorkMark, 'lab'),
+                                _buildMarkChip(mark.classWorkMark, 'class'),
+                                
+                                if (mark.homeWorkMark == null && 
+                                    mark.controlWorkMark == null && 
+                                    mark.labWorkMark == null && 
+                                    mark.classWorkMark == null)
+                                  const Text('Б/О', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-
+                      
                       const SizedBox(width: 10),
-
                       Container(
                         alignment: Alignment.centerRight,
                         child: Text(

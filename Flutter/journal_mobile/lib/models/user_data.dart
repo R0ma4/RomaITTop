@@ -1,4 +1,3 @@
-// данные пользователя
 class UserData {
   final int studentId;
   final String fullName;

@@ -5,7 +5,7 @@ import 'screens/login_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Убеждаемся, что флаттер-движок инициализирован
+  WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ru', null);
 
   runApp(const MyApp());
