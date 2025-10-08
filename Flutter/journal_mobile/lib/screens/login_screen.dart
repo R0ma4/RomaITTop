@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
-import 'home_screen.dart';
+import 'menu_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('token', token);
 
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => HomeScreen(token: token)),
+          MaterialPageRoute(builder: (_) => MainMenuScreen(token: token)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

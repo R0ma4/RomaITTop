@@ -3,15 +3,15 @@ import '../models/mark.dart';
 import '../models/user_data.dart';
 import '../services/api_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class MarksAndProfileScreen extends StatefulWidget {
   final String token;
-  const HomeScreen({super.key, required this.token});
+  const MarksAndProfileScreen({super.key, required this.token});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<MarksAndProfileScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<MarksAndProfileScreen> {
   final _apiService = ApiService();
   late Future<List<Mark>> _marksFuture;
   late Future<UserData> _userFuture;
