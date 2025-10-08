@@ -3,6 +3,8 @@ import 'marks_and_profile_screen.dart';
 import 'schedule_screen.dart';
 import '../models/mark.dart';
 import '../services/api_service.dart';
+import 'login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainMenuScreen extends StatefulWidget {
   final String token;
@@ -180,6 +182,20 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -276,7 +292,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         width: 250,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.calendar_today),
-                          label: const Text('Расписание (В разработке)'),
+                          label: const Text('Расписание'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -285,6 +301,29 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                           },
                         ),
                       ),
+
+                      // Spacer(), /*без него выглядит дерьмово*/
+            
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: SizedBox(
+                          width: 200,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.logout),
+                            label: const Text('Выйти из профиля'),
+                            onPressed: _logout,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10), /*без него выглядит дерьмово*/
                     ],
                   ),
                 ),
