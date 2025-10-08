@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/menu_screen.dart';
 import 'screens/login_screen.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Убеждаемся, что флаттер-движок инициализирован
+  await initializeDateFormatting('ru', null);
+
   runApp(const MyApp());
 }
 

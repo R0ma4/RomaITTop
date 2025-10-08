@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'marks_and_profile_screen.dart';
+import 'schedule_screen.dart';
 
 class MainMenuScreen extends StatelessWidget {
   final String token;
@@ -41,8 +42,9 @@ class MainMenuScreen extends StatelessWidget {
                 icon: const Icon(Icons.calendar_today),
                 label: const Text('Расписание (В разработке)'),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Раздел расписания скоро будет доступен!')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ScheduleScreen(token: token),)
                   );
                 },
               ),

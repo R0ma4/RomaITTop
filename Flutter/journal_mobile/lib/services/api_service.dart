@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/mark.dart';
 import '../models/user_data.dart';
+import '../models/days_element.dart';
 
 class ApiService {
   final String _baseUrl = "https://msapi.top-academy.ru/api/v2"; 
@@ -71,4 +72,29 @@ class ApiService {
     }
   }
 
+  Future <List<ScheduleElement>> getSchedule(String token, String dateFrom, String dateTo) async { 
+    final String _baseUrl = "https://msapi.top-academy.ru/api/v2";
+    
+    final response = await http.get(
+      Uri.parse('$_baseUrl/schedule/operations/get-by-date-range?date_start=$dateFrom&date_end=$dateTo'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Referer': 'https://journal.top-academy.ru',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> scheduleData = jsonDecode(response.body); 
+      
+      return scheduleData
+          .map((json) => ScheduleElement.fromJson(json as Map<String, dynamic>))
+          .toList();
+          
+    } else {
+      print("Failed to load schedule: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      throw Exception('Failed to load schedule');
+    }
+  }
 }
