@@ -58,40 +58,71 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
   Widget _buildScheduleDay(ScheduleElement element) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      padding: const EdgeInsets.all(10.0),
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.0),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.access_time, size: 16, color: Colors.grey),
-              const SizedBox(width: 4),
-              Text(
-                '${element.startedAt} - ${element.finishedAt}',
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            element.subjectName,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 5),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(element.teacherName),
-              Text('Аудитория: ${element.roomName}'),
-            ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.access_time, size: 16, color: Colors.indigo),
+                const SizedBox(width: 5),
+                Text(
+                  '${element.startedAt.substring(0, 5)} - ${element.finishedAt.substring(0, 5)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.indigo),
+                ),
+                const Spacer(),
+                Text(
+                  'Пара ${element.lesson}',
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+            ),
+            const Divider(height: 12, thickness: 1),
+            Text(
+              element.subjectName,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    element.teacherName,
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  element.roomName,
+                  style: const TextStyle(fontSize: 13, color: Colors.black54),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -163,21 +194,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     final dayName = DateFormat('EEEE', 'ru_RU').format(date);
                     final formattedDate = '${dayName[0].toUpperCase()}${dayName.substring(1)}, ${DateFormat('dd.MM').format(date)}';
                     
-                    return Card(
-                      margin: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              formattedDate,
-                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-                            ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                          child: Text(
+                            formattedDate,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.black87),
                           ),
-                          ...lessons.map(_buildScheduleDay).toList(),
-                        ],
-                      ),
+                        ),
+                        ...lessons.map(_buildScheduleDay).toList(),
+                        const SizedBox(height: 16),
+                      ],
                     );
                   },
                 );
