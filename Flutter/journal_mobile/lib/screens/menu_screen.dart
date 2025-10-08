@@ -14,7 +14,8 @@ class MainMenuScreen extends StatefulWidget {
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<Mark>> _marksFuture;
+  // Загружаем оценки один раз
+  late Future<List<Mark>> _marksFuture; 
 
   @override
   void initState() {
@@ -22,6 +23,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     _marksFuture = _apiService.getMarks(widget.token);
   }
 
+  // === 1. ЛОГИКА ВЫЧИСЛЕНИЯ СРЕДНИХ ОЦЕНОК ===
   Map<String, double> _calculateAverages(List<Mark> marks) {
     double totalHomeWorkMarks = 0;
     int homeWorkCount = 0;
@@ -64,8 +66,44 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
       'overall': allMarksCount > 0 ? totalAllMarks / allMarksCount : 0.0,
     };
   }
+  
+  // === 2. ЛОГИКА ВЫЧИСЛЕНИЯ СТАТИСТИКИ ПОСЕЩАЕМОСТИ ===
+  Map<String, double> _calculateAttendance(List<Mark> marks) {
+    if (marks.isEmpty) {
+      return {'total': 0, 'attended': 0, 'late': 0, 'missed': 0, 'attended_percent': 0.0, 'late_percent': 0.0, 'missed_percent': 0.0};
+    }
 
-  Widget _buildAverageCard(String title, double average, Color color) {
+    final int totalLessons = marks.length;
+    int attendedCount = 0;  // statusWas 1 (был) или 2 (опоздал)
+    int lateCount = 0;      // statusWas 2 (опоздал)
+    int missedCount = 0;    // statusWas 0 (не был)
+
+    for (var mark in marks) {
+      if (mark.statusWas == 1) {
+        attendedCount++;
+      } else if (mark.statusWas == 2) {
+        attendedCount++;
+        lateCount++;
+      } else if (mark.statusWas == 0) {
+        missedCount++;
+      }
+    }
+    
+    return {
+      'total': totalLessons.toDouble(),
+      'attended': attendedCount.toDouble(),
+      'attended_percent': (attendedCount / totalLessons) * 100,
+      'late': lateCount.toDouble(),
+      'late_percent': (lateCount / totalLessons) * 100,
+      'missed': missedCount.toDouble(),
+      'missed_percent': (missedCount / totalLessons) * 100,
+    };
+  }
+
+  // === 3. ВИДЖЕТЫ КАРТОЧЕК ===
+  
+  // Вспомогательный виджет для отображения карточки СРЕДНЕЙ оценки
+  Widget _buildMarkAverageCard(String title, double average, Color color) {
     final averageString = average == 0.0 ? 'Н/Д' : average.toStringAsFixed(2);
     
     return Expanded(
@@ -101,6 +139,55 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
+  // Новый вспомогательный виджет для отображения статистики ПОСЕЩАЕМОСТИ
+  Widget _buildAttendanceStatCard(String title, double count, double percentage, Color color) {
+    final countString = count.toInt().toString();
+    final percentString = percentage.toStringAsFixed(2);
+    
+    String mainText;
+    
+    if (title == 'Всего пар') {
+      mainText = countString;
+    } else {
+      // Формат: "741 (97.12%)"
+      mainText = '$countString (${percentString}%)';
+    }
+
+    return Expanded(
+      child: Card(
+        color: color.withOpacity(0.9),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                mainText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16, // Немного меньше, чтобы вместился процент
+                  fontWeight: FontWeight.bold, 
+                  color: Colors.white
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 10, // Меньше шрифт для заголовка
+                  color: Colors.white70
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,21 +202,62 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           }
 
           Map<String, double> averages = {};
-          if (snapshot.hasData) {
-            averages = _calculateAverages(snapshot.data!);
+          Map<String, double> attendance = {};
+          
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            final marks = snapshot.data!;
+            averages = _calculateAverages(marks);
+            attendance = _calculateAttendance(marks); 
           }
           
           return SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ЗАГОЛОВОК ДЛЯ ОЦЕНОК
+                 const Padding(
+                  padding: EdgeInsets.only(top: 10.0, bottom: 4.0, left: 12.0, right: 12.0),
+                  child: Text(
+                    'Средние оценки',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                
+                // 1. Карточки средних оценок
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     children: [
-                      _buildAverageCard('Ср. Д/Р', averages['home'] ?? 0.0, Colors.red),
-                      _buildAverageCard('Ср. К/Р', averages['control'] ?? 0.0, Colors.green),
-                      _buildAverageCard('Ср. Л/Р', averages['lab'] ?? 0.0, Colors.purple),
-                      _buildAverageCard('Ср. Общая', averages['overall'] ?? 0.0, Colors.blue),
+                      _buildMarkAverageCard('Ср. Д/Р', averages['home'] ?? 0.0, Colors.red),
+                      _buildMarkAverageCard('Ср. К/Р', averages['control'] ?? 0.0, Colors.green),
+                      _buildMarkAverageCard('Ср. Л/Р', averages['lab'] ?? 0.0, Colors.purple),
+                      _buildMarkAverageCard('Ср. Общая', averages['overall'] ?? 0.0, Colors.blue),
+                    ],
+                  ),
+                ),
+                
+                // ЗАГОЛОВОК ДЛЯ ПОСЕЩАЕМОСТИ
+                const Padding(
+                  padding: EdgeInsets.only(top: 10.0, bottom: 4.0, left: 12.0, right: 12.0),
+                  child: Text(
+                    'Статистика посещаемости',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                
+                // 2. Карточки посещаемости
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      // Всего пар (без процента)
+                      _buildAttendanceStatCard('Всего пар', attendance['total'] ?? 0.0, 0.0, Colors.grey.shade700),
+                      // Посещено
+                      _buildAttendanceStatCard('Посещено Пар', attendance['attended'] ?? 0.0, attendance['attended_percent'] ?? 0.0, Colors.green.shade700),
+                      // Опозданий
+                      _buildAttendanceStatCard('Опозданий', attendance['late'] ?? 0.0, attendance['late_percent'] ?? 0.0, Colors.orange.shade700),
+                      // Пропусков
+                      _buildAttendanceStatCard('Пропусков', attendance['missed'] ?? 0.0, attendance['missed_percent'] ?? 0.0, Colors.red.shade700),
                     ],
                   ),
                 ),
@@ -139,7 +267,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       const Text(
                         'Выберите раздел:',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -149,7 +277,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         width: 250,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.school),
-                          label: const Text('Оценки и Посещаемость'),
+                          label: const Text('Оценки и Профиль'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
@@ -164,7 +292,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         width: 250,
                         child: ElevatedButton.icon(
                           icon: const Icon(Icons.calendar_today),
-                          label: const Text('Расписание'),
+                          label: const Text('Расписание (В разработке)'),
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(
