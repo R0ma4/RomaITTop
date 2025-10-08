@@ -54,12 +54,63 @@ class _HomeScreenState extends State<MarksAndProfileScreen> {
             itemCount: marks.length,
             itemBuilder: (context, index) {
               final mark = marks[index];
-              return ListTile(
-                title: Text(mark.specName),
-                subtitle: Text(mark.lessonTheme),
-                trailing: Text(
-                  mark.homeWorkMark?.toString() ?? 'Б/О', // Б/О - без оценки
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              final markValue = mark.homeWorkMark?.toString() ?? 'Б/О';
+              
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 40,
+                        alignment: Alignment.center,
+                        child: Text(
+                          markValue,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: markValue == 'Б/О' ? Colors.grey : Colors.blue,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              mark.specName,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              mark.lessonTheme,
+                              style: const TextStyle(color: Colors.grey, fontSize: 14),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Container(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          mark.dateVisit,
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
