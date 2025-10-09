@@ -22,14 +22,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final token = await _apiService.login(
-        _usernameController.text,
-        _passwordController.text,
-      );
+      final username = _usernameController.text;
+      final password = _passwordController.text;
+      
+      final token = await _apiService.login(username, password);
 
       if (token != null && mounted) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
+        await prefs.setString('username', username); 
+        await prefs.setString('password', password); 
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => MainMenuScreen(token: token)),
