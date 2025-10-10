@@ -1,4 +1,3 @@
-// screens/leaderboard_screen.dart
 import 'package:flutter/material.dart';
 import '../models/leaderboard_user.dart';
 import '../services/api_service.dart';

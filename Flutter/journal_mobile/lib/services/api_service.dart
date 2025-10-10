@@ -189,7 +189,6 @@ class ApiService {
       return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
     } catch (e) {
       print("Error parsing group leaders: $e");
-      // Пробуем альтернативный парсинг
       try {
         final groupModel = GroupPositionModel.fromJson(jsonDecode(response.body));
         return groupModel.groupLeaders;
@@ -235,7 +234,6 @@ Future<List<LeaderboardUser>> getStreamLeaders(String token) async {
       return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
     } catch (e) {
       print("Error parsing stream leaders: $e");
-      // Пробуем альтернативный парсинг
       try {
         final streamModel = StreamPositionModel.fromJson(jsonDecode(response.body));
         return streamModel.streamLeaders;
