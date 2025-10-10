@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/user_data.dart';
 import 'marks_and_profile_screen.dart';
 import 'schedule_screen.dart';
 import '../models/mark.dart';
@@ -16,12 +17,24 @@ class MainMenuScreen extends StatefulWidget {
 
 class _MainMenuScreenState extends State<MainMenuScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<Mark>> _marksFuture; 
+  late Future<Map<String, dynamic>> _dataFuture; 
 
   @override
   void initState() {
     super.initState();
-    _marksFuture = _apiService.getMarks(widget.token);
+    _dataFuture = _loadData();
+  }
+
+  Future<Map<String, dynamic>> _loadData() async {
+    final List<dynamic> results = await Future.wait([
+      _apiService.getUser(widget.token),
+      _apiService.getMarks(widget.token),
+    ]);
+    
+    return {
+      'user': results[0] as UserData,
+      'marks': results[1] as List<Mark>,
+    };
   }
 
   Map<String, double> _calculateAverages(List<Mark> marks) {
@@ -196,32 +209,132 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     }
   }
 
+  int _getPointsByType(List<Map<String, dynamic>> pointsInfo, int typeId) {
+  print("Searching for type: $typeId in $pointsInfo");
+  
+  try {
+    final item = pointsInfo.firstWhere(
+      (item) => item['new_gaming_point_types__id'] == typeId,
+    );
+    final points = item['points'];
+    print("Found: $points for type $typeId");
+    return points ?? 0;
+  } catch (e) {
+    print("Not found type $typeId, error: $e");
+    return 0;
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Главное меню'),
       ),
-      body: FutureBuilder<List<Mark>>(
-        future: _marksFuture,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          Map<String, double> averages = {};
-          Map<String, double> attendance = {};
           
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            final marks = snapshot.data!;
-            averages = _calculateAverages(marks);
-            attendance = _calculateAttendance(marks); 
+          if (snapshot.hasError) {
+             return Center(child: Text("Ошибка загрузки данных: ${snapshot.error}"));
           }
+          
+          if (!snapshot.hasData) {
+            return const Center(child: Text("Нет данных для отображения"));
+          }
+
+          final UserData userData = snapshot.data!['user'];
+          final List<Mark> marks = snapshot.data!['marks'];
+          
+          final averages = _calculateAverages(marks);
+          final attendance = _calculateAttendance(marks); 
           
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                 Padding(
+                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                   child: Column(
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: userData.photoPath.isNotEmpty
+                              ? Image.network(
+                                  '${userData.photoPath}',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(Icons.account_circle, size: 100);
+                                  },
+                                )
+                              : const Icon(Icons.account_circle, size: 100),
+                        ),),
+                        /* Text(userData.position == 1 ? 'Студент' : userData.position == 2 ? 'Преподаватель' : 'Гость',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),*/ // хз херня какая-то с позициями (position - место в списке ? Или роль ?)
+
+                       Text(
+                         userData.fullName,
+                         style: const TextStyle(
+                           fontSize: 22,
+                           fontWeight: FontWeight.bold,
+                         ),
+                       ),
+                       const SizedBox(height: 4),
+                       Text(
+                         'Группа: ${userData.groupName}',
+                         style: TextStyle(
+                           fontSize: 16,
+                           color: Colors.grey[700],
+                         ),
+                       ),
+                       const SizedBox(height: 4),
+                       Text(
+                        'ТопMoney: ${_getPointsByType(userData.pointsInfo, 1) + _getPointsByType(userData.pointsInfo, 2)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                       const SizedBox(height: 4),
+                       Text(
+                        'ТопКоины: ${_getPointsByType(userData.pointsInfo, 1)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'ТопГемы: ${_getPointsByType(userData.pointsInfo, 2)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                       const SizedBox(height: 4),
+                       /* Text(
+                         'achieves_count: ${userData.groupName}',
+                         style: TextStyle(
+                           fontSize: 16,
+                           color: Colors.grey[700],
+                         ),
+                       ), */
+                     ],
+                   ),
+                 ),
+                 const Divider(indent: 16, endIndent: 16),
+
                  const Padding(
                   padding: EdgeInsets.only(top: 10.0, bottom: 4.0, left: 12.0, right: 12.0),
                   child: Text(
@@ -301,8 +414,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                           },
                         ),
                       ),
-
-                      // Spacer(), /*без него выглядит дерьмово*/
             
                       Padding(
                         padding: const EdgeInsets.all(16.0),
