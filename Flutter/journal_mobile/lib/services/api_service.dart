@@ -4,6 +4,9 @@ import '../models/mark.dart';
 import '../models/user_data.dart';
 import '../models/days_element.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/leaderboard_user.dart';
+import '../models/group_position_model.dart';
+import '../models/stream_position_model.dart';
 
 // не трогать КОД - НИКОМУ кроме КЕЙСИ (Дианы) !!! НИЗАЧТО (сломаю пальцы и в жопу засуну)
 class ApiService {
@@ -155,4 +158,96 @@ class ApiService {
       throw Exception('Failed to load schedule');
     }
   }
+
+  Future<List<LeaderboardUser>> getGroupLeaders(String token) async {
+  var response = await http.get(
+    Uri.parse('$_baseUrl/dashboard/progress/leader-group'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'Referer': 'https://journal.top-academy.ru',
+    },
+  );
+
+  if (response.statusCode == 401) {
+    final newToken = await _reauthenticate();
+    if (newToken != null) {
+      response = await http.get(
+        Uri.parse('$_baseUrl/dashboard/progress/leader-group'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $newToken',
+          'Referer': 'https://journal.top-academy.ru',
+        },
+      );
+    }
+  }
+
+  if (response.statusCode == 200) {
+    try {
+      final List<dynamic> leadersData = jsonDecode(response.body);
+      return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
+    } catch (e) {
+      print("Error parsing group leaders: $e");
+      // Пробуем альтернативный парсинг
+      try {
+        final groupModel = GroupPositionModel.fromJson(jsonDecode(response.body));
+        return groupModel.groupLeaders;
+      } catch (e2) {
+        print("Alternative parsing also failed: $e2");
+        throw Exception('Failed to parse group leaders data');
+      }
+    }
+  } else {
+    print("Failed to load group leaders: ${response.statusCode}");
+    print("Response body: ${response.body}");
+    throw Exception('Failed to load group leaders: ${response.statusCode}');
+  }
+}
+
+Future<List<LeaderboardUser>> getStreamLeaders(String token) async {
+  var response = await http.get(
+    Uri.parse('$_baseUrl/dashboard/progress/leader-stream'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'Referer': 'https://journal.top-academy.ru',
+    },
+  );
+
+  if (response.statusCode == 401) {
+    final newToken = await _reauthenticate();
+    if (newToken != null) {
+      response = await http.get(
+        Uri.parse('$_baseUrl/dashboard/progress/leader-stream'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $newToken',
+          'Referer': 'https://journal.top-academy.ru',
+        },
+      );
+    }
+  }
+
+  if (response.statusCode == 200) {
+    try {
+      final List<dynamic> leadersData = jsonDecode(response.body);
+      return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
+    } catch (e) {
+      print("Error parsing stream leaders: $e");
+      // Пробуем альтернативный парсинг
+      try {
+        final streamModel = StreamPositionModel.fromJson(jsonDecode(response.body));
+        return streamModel.streamLeaders;
+      } catch (e2) {
+        print("Alternative parsing also failed: $e2");
+        throw Exception('Failed to parse stream leaders data');
+      }
+    }
+  } else {
+    print("Failed to load stream leaders: ${response.statusCode}");
+    print("Response body: ${response.body}");
+    throw Exception('Failed to load stream leaders: ${response.statusCode}');
+  }
+}
 }

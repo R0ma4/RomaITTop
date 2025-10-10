@@ -6,6 +6,7 @@ import '../models/mark.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'leaderboard_screen.dart';
 
 class MainMenuScreen extends StatefulWidget {
   final String token;
@@ -435,6 +436,43 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                         ),
                       ),
                       const SizedBox(height: 10), /*без него выглядит дерьмово*/
+                      
+                      SizedBox(
+                        width: 250,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.leaderboard),
+                          label: Text('Лидеры группы'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => LeaderboardScreen(
+                                  token: widget.token,
+                                  isGroupLeaderboard: true,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: 250,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.leaderboard_outlined),
+                          label: Text('Лидеры потока'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => LeaderboardScreen(
+                                  token: widget.token,
+                                  isGroupLeaderboard: false,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 15),
                     ],
                   ),
                 ),
