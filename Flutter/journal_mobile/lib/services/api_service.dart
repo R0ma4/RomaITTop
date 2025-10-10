@@ -5,8 +5,7 @@ import '../models/user_data.dart';
 import '../models/days_element.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/leaderboard_user.dart';
-import '../models/group_position_model.dart';
-import '../models/stream_position_model.dart';
+import '../models/leader_position_model.dart';
 
 // не трогать КОД - НИКОМУ кроме КЕЙСИ (Дианы) !!! НИЗАЧТО (сломаю пальцы и в жопу засуну)
 class ApiService {
