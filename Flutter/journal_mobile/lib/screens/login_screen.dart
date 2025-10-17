@@ -5,29 +5,32 @@ import 'menu_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
+  
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _apiService = ApiService();
   bool _isLoading = false;
 
   Future<void> _login() async {
+   
     setState(() {
       _isLoading = true;
     });
-
     try {
       final username = _usernameController.text;
       final password = _passwordController.text;
       
       final token = await _apiService.login(username, password);
 
-      if (token != null && mounted) {
+      if (token != null && mounted) 
+      {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('username', username); 
@@ -36,12 +39,15 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => MainMenuScreen(token: token)),
         );
-      } else {
+      } else 
+      {
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Неверный логин или пароль')),
         );
       }
     } catch (e) {
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ошибка сети: $e')),
       );
@@ -53,6 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

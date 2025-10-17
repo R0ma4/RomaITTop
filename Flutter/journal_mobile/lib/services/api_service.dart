@@ -5,9 +5,11 @@ import '../models/user_data.dart';
 import '../models/days_element.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/leaderboard_user.dart';
-import '../models/leader_position_model.dart';
+import '../models/group_position_model.dart';
+import '../models/stream_position_model.dart';
 
-// не трогать КОД - НИКОМУ кроме КЕЙСИ (Дианы) !!! НИЗАЧТО (сломаю пальцы и в жопу засуну)
+// не трогать КОД - НИКОМУ кроме КЕЙСИ (Дианы) !!! НИЗАЧТО (сломаю пальцы и в жопу засуну) 
+// :3
 class ApiService {
   final String _baseUrl = "https://msapi.top-academy.ru/api/v2"; 
 
@@ -62,7 +64,6 @@ class ApiService {
         'Referer': 'https://journal.top-academy.ru', 
       },
     );
-
     if (response.statusCode == 401) { 
       final newToken = await _reauthenticate();
       if (newToken != null) {
@@ -188,6 +189,7 @@ class ApiService {
       return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
     } catch (e) {
       print("Error parsing group leaders: $e");
+      // Пробуем альтернативный парсинг
       try {
         final groupModel = GroupPositionModel.fromJson(jsonDecode(response.body));
         return groupModel.groupLeaders;
@@ -233,6 +235,7 @@ Future<List<LeaderboardUser>> getStreamLeaders(String token) async {
       return leadersData.map((json) => LeaderboardUser.fromJson(json)).toList();
     } catch (e) {
       print("Error parsing stream leaders: $e");
+      // Пробуем альтернативный парсинг
       try {
         final streamModel = StreamPositionModel.fromJson(jsonDecode(response.body));
         return streamModel.streamLeaders;

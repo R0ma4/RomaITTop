@@ -10,8 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.1
+  yaml: ^3.1.0
+  path_provider: ^2.0.11
   shared_preferences: ^2.2.3
   intl: ^0.18.0
+  ini: ^2.1.0
+  flutter_local_notifications: ^19.4.2
+  connectivity_plus: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -20,3 +25,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/settings/config.conf
