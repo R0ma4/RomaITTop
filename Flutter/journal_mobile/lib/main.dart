@@ -5,7 +5,8 @@ import 'screens/menu_screen.dart';
 import 'screens/login_screen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'settings/FileSettings.dart';
+
+import 'settings/FileSettings.dart' as FSETTENGS;
 import 'debug/page_admin.dart';
 import 'debug/logi.dart'; // Логирование (работает на божьей помощи)
 
@@ -13,18 +14,23 @@ String appVersion = "";
 String BildingVersion = "";
 String LANGUAGE_ELEMENT = "";
 
+
+
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-    appVersion = await getValue('Application', 'APP_VERSION');
-    BildingVersion = await getValue('Application', 'VERSION_APP');
-    LANGUAGE_ELEMENT = await getValue('Application', 'LANGUAGE_ELEMENT');
+
+  FSETTENGS.Conect();
+  
+    WidgetsFlutterBinding.ensureInitialized();
+    appVersion = await FSETTENGS.getValue('Application', 'APP_VERSION');
+    BildingVersion = await FSETTENGS.getValue('Application', 'VERSION_APP');
+    LANGUAGE_ELEMENT = await FSETTENGS.getValue('Application', 'LANGUAGE_ELEMENT');
   
   Console.Write(
   "\nLANGUAGE = ${LANGUAGE_ELEMENT}"+
   "\nVirsion: ${appVersion}"+
   "\nApp Virsion: ${BildingVersion}");
 
-  await initializeDateFormatting(await getValue('Application', 'LANGUAGE_ELEMENT').toString(), null);
+  await initializeDateFormatting(await FSETTENGS.getValue('Application', 'LANGUAGE_ELEMENT').toString(), null);
   //  await setValue('Application', 'APP_VERSION',"\"apps\""); Обновление значений кофигрупации
   runApp(const MyApp());
 }
@@ -32,8 +38,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   Future<String?> _getToken() async {
-
-   
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
     
@@ -41,20 +45,17 @@ class MyApp extends StatelessWidget {
 
 Widget Bilder_App(BuildContext context) 
 {
-   Debug.log("Hello, World");
-  Console.Write("${appVersion.runtimeType} ${appVersion.toString()}");
-  if (appVersion.toString() == 'debug'.toString()) 
+  if (appVersion == '\'debug\'') 
   {
     return PageAdmin();
   }
-  else if (appVersion.toString() == 'app'.toString()) 
+  else if (appVersion == '\'app\'') 
   {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Student App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: FSETTENGS.ThemeDate(),
+      
       home:FutureBuilder<String?>(
         future: _getToken(),
         builder: (context, snapshot) {

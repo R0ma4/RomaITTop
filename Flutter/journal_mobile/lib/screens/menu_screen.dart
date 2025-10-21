@@ -8,6 +8,8 @@ import 'login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'leaderboard_screen.dart';
 
+import '../settings/SettengsPage.dart';
+
 class MainMenuScreen extends StatefulWidget {
   final String token;
   const MainMenuScreen({super.key, required this.token});
@@ -481,6 +483,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           );
         },
       ),
+      floatingActionButton: IconButton(onPressed:
+      () => 
+      {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ScreenSettengs()
+          ),
+        )
+      }, icon: Icon(Icons.settings)),
     );
   }
 }

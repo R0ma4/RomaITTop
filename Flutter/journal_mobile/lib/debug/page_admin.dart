@@ -55,7 +55,7 @@ class _PageAdmin extends State<PageAdmin>
     {
        return Scaffold
        (
-      appBar: AppBar( title: const Text("ПАНЕЛЬ РАЗРАБОТЧИКА"),),
+        appBar: AppBar( title: const Text("ПАНЕЛЬ РАЗРАБОТЧИКА"),),
       body: Padding(padding:  const EdgeInsets.all(0.0), 
           child: Column
           (
